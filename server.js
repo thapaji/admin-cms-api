@@ -2,7 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import { conectMongo } from "./src/config/mongoDBConfig.js";
 import cors from 'cors';
-// import userRouter from './src/routers/userRouter.js'
+import routers from './src/routers/routers.js'
+import userRouter from './src/routers/userRouter.js'
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(cors())
 
 /*************** Routers and endpoints ***********************/
 // app.use('/api/v1/users', userRouter)
+routers.forEach(({ path, middlewares }) => app.use(path, ...middlewares))
 
 app.get('/', (req, res, next) => {
   res.json({
@@ -37,7 +39,7 @@ app.use('*', (req, res, next) => {
 /*********    Global Error Handler   ***********/
 
 app.use((error, req, res, next) => {
-  console.log(error)
+  console.log('-----------', error, '---------------')
   res.status(error.status || 500);
   res.json({
     status: 'error',
