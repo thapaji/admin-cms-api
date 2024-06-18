@@ -4,6 +4,7 @@ const UserSchema = new mongoose.Schema({
     fname: {
         type: String,
         required: true,
+        maxLength: [20, 'Long names are not allowed']
     },
     lname: {
         type: String,
@@ -14,6 +15,14 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         index: 1,
         required: true,
+    },
+    status: {
+        type: String,
+        default: 'inactive',
+    },
+    role: {
+        type: String,
+        default: 'user',
     },
     password: {
         type: String,

@@ -12,20 +12,24 @@ export const getUserByEmail = (email) => {
     return UserSchema.findOne({ email });
 }
 
+export const getAUser = (filter) => {
+    return UserSchema.findOne({ filter });
+}
+
 export const getUsers = () => {
     return UserSchema.find();
 }
 
 /*UPDATE*/
 
+export const updateUserById = async ({ _id, obj }) => {
+    console.log(obj);
+    return await UserSchema.findByIdAndUpdate(_id, obj);
+}
+
 export const updateUser = async (filter, obj) => {
     console.log(obj);
     return await UserSchema.findOneAndUpdate(filter, obj);
-}
-
-export const updateUserbyId = (_id, listItem) => {
-    console.log(listItem);
-    return UserSchema.findByIdAndUpdate({ _id }, { ...users }, { new: true });
 }
 
 /*DELETE ONE or  MANY*/

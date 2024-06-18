@@ -7,3 +7,7 @@ export const insertToken = (obj) => {
 export const getToken = token => {
     return SessionSchema.findOne({ token });
 }
+
+export const deleteSession = filter => {
+    return SessionSchema.findOneAndDelete(filter);
+}
