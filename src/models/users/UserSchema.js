@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
     refreshJWT: {
         type: String,
         default: '',

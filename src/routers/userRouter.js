@@ -1,10 +1,10 @@
 import express from "express";
 import { comparePassword, hashPassword } from "../utils/bcrypt.js";
-import { getUserByEmail, insertUser } from "../models/users/UserModel.js";
+import { getUserByEmail, insertUser, updateUser } from "../models/users/UserModel.js";
 import { newUserValidation } from "../middlewares/joiValidation.js";
 import { signAccessToken, signRefreshJWT } from "../utils/jwt.js";
 import { auth } from "../middlewares/auth.js";
-import { insertToken } from "../models/session/SessionModel.js";
+import { deleteSession, insertToken } from "../models/session/SessionModel.js";
 import { v4 as uuidv4 } from 'uuid'
 import { emailVerificationMail } from "../services/email/nodemailer.js";
 
@@ -74,6 +74,7 @@ router.post("/", newUserValidation, async (req, res, next) => {
         associate: user.email
       }
       const result = await insertToken(obj);
+
       if (result?._id) {
         emailVerificationMail({
           email: user.email,
@@ -98,6 +99,28 @@ router.post("/", newUserValidation, async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/user-verification', async (req, res, next) => {
+  try {
+    const { c, e } = req.body;
+    const session = await deleteSession({ token: c, associate: e });
+    if (session?._id) {
+      const result = await updateUser({ email: e }, { status: 'active', isEmailVerified: true })
+      if (result?._id) {
+        return res.json({
+          status: 'success',
+          message: 'Your Email has been Verified... You can sign in now.',
+        })
+      }
+    }
+    res.json({
+      status: 'error',
+      message: 'Invalid link contact admin'
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 router.post('/login', async (req, res, next) => {
   try {
