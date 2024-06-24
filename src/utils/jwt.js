@@ -7,7 +7,7 @@ import { updateUser } from "../models/users/UserModel.js";
 
 export const signAccessToken = (payload) => {
     const token = JWT.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
-    insertToken({ token });
+    insertToken({ token, associate:payload.email });
     return token;
 }
 
@@ -23,7 +23,6 @@ export const verifyAccessJWT = (token) => {
 }
 
 /*************** Create refresh JWt *******************/
-/*************** Create refresh JWt *******************/
 
 export const signRefreshJWT = (email) => {
     const refreshJWT = JWT.sign({ email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "30d" });
@@ -33,3 +32,13 @@ export const signRefreshJWT = (email) => {
 
 
 /*************** Verify refresh JWt *******************/
+
+
+
+
+export const getTokens =  email => {
+    return{
+        accessJWT: signAccessToken({ email }),
+        refreshJWT: signRefreshJWT(email)
+    }
+}

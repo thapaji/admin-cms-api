@@ -2,7 +2,7 @@ import express from "express";
 import { comparePassword, hashPassword } from "../utils/bcrypt.js";
 import { getUserByEmail, insertUser, updateUser } from "../models/users/UserModel.js";
 import { newUserValidation } from "../middlewares/joiValidation.js";
-import { signAccessToken, signRefreshJWT } from "../utils/jwt.js";
+import { getTokens, signAccessToken, signRefreshJWT } from "../utils/jwt.js";
 import { auth } from "../middlewares/auth.js";
 import { deleteSession, insertToken } from "../models/session/SessionModel.js";
 import { v4 as uuidv4 } from 'uuid'
@@ -17,50 +17,6 @@ router.all("/", (req, res, next) => {
   console.log("from all");
   next();
 });
-
-
-
-// router.post("/", newUserValidation, async (req, res, next) => {
-//   try {
-//     req.body.password = hashPassword(req.body.password);
-//     const user = await insertUser(req.body);
-//     if (user?._id) {
-//       const obj = {
-//         token: uuidv4(),
-//         associate: user.email
-//       }
-//       const result = insertToken(obj);
-
-//       if (result?._id) {
-//         return res.json({
-//           status: "success",
-//           message: "We have sent you an email to verify your account. Please check your inbox/junk and click on the link to verify.",
-//         })
-//       }
-//       res.json({
-//         status: "error",
-//         message: "Unable to create user. Please contact administration",
-//       }
-//     }
-
-//     // user?._id
-//     //   ? res.json({
-//     //     status: "success",
-//     //     message: "We have sent you an email to verify your account. Please check your inbox/junk and click on the link to verify.",
-//     //     user
-//     //   })
-//     //   : res.json({
-//     //     status: "error",
-//     //     message: "Unable to create user. Please try again",
-//     //   });
-//   } catch (error) {
-//     if (error.message.includes('E11000 duplicate key')) {
-//       error.status = '200';
-//       error.message = 'Email already in use...'
-//     }
-//     next(error);
-//   }
-// });
 
 
 router.post("/", newUserValidation, async (req, res, next) => {
@@ -130,15 +86,24 @@ router.post('/login', async (req, res, next) => {
     }
     const user = await getUserByEmail(email);
     if (user?._id) {
+      if (!user?.isEmailVerified) {
+        return res.json({
+          status: "error",
+          message: "Please verify your email.",
+        })
+      }
+      if (user?.status === 'inactive') {
+        return res.json({
+          status: "error",
+          message: "Your account is locked. Please contact the administrator",
+        })
+      }
       const isMatch = comparePassword(password, user.password);
       if (isMatch) {
         return res.json({
           status: 'success',
           message: 'user logged in',
-          tokens: {
-            accessJWT: signAccessToken({ email }),
-            refreshJWT: signRefreshJWT(email)
-          }
+          tokens: getTokens(email)
         })
       }
     }
@@ -152,12 +117,25 @@ router.post('/login', async (req, res, next) => {
 })
 
 
-/************** Private Controllers *****************/
 
-// router.get("/", auth, (req, res, next) => {
+router.get("/", auth, (req, res, next) => {
+  try {
+    req.userInfo.refreshJWT = undefined;
+    req.userInfo.__v = undefined;
+    res.json({
+      status: "success",
+      message: "Successfully logged in",
+      user: req.userInfo
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// router.get("/", (req, res, next) => {
 //   try {
-//     req.userInfo.refreshJWT = undefined;
-//     req.userInfo.__v = undefined;
+//     // req.userInfo.refreshJWT = undefined;
+//     // req.userInfo.__v = undefined;
 //     res.json({
 //       status: "success",
 //       message: "todo GET",
@@ -167,19 +145,5 @@ router.post('/login', async (req, res, next) => {
 //     next(error);
 //   }
 // });
-
-router.get("/", (req, res, next) => {
-  try {
-    // req.userInfo.refreshJWT = undefined;
-    // req.userInfo.__v = undefined;
-    res.json({
-      status: "success",
-      message: "todo GET",
-      user: req.userInfo
-    });
-  } catch (error) {
-    next(error);
-  }
-});
 
 export default router;
