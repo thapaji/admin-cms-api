@@ -13,6 +13,7 @@ export const auth = async (req, res, next) => {
             console.log(tokenObj)
             const user = await getUserByEmail(decoded.email)
             if (user?._id) {
+                user.__v = undefined;
                 user.password = undefined;
                 req.userInfo = user;
                 return next()

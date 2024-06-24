@@ -91,8 +91,7 @@ router.post('/login', async (req, res, next) => {
           status: "error",
           message: "Please verify your email.",
         })
-      }
-      if (user?.status === 'inactive') {
+      } else if (user?.status === 'inactive') {
         return res.json({
           status: "error",
           message: "Your account is locked. Please contact the administrator",
@@ -121,7 +120,6 @@ router.post('/login', async (req, res, next) => {
 router.get("/", auth, (req, res, next) => {
   try {
     req.userInfo.refreshJWT = undefined;
-    req.userInfo.__v = undefined;
     res.json({
       status: "success",
       message: "Successfully logged in",
@@ -131,19 +129,5 @@ router.get("/", auth, (req, res, next) => {
     next(error);
   }
 });
-
-// router.get("/", (req, res, next) => {
-//   try {
-//     // req.userInfo.refreshJWT = undefined;
-//     // req.userInfo.__v = undefined;
-//     res.json({
-//       status: "success",
-//       message: "todo GET",
-//       user: req.userInfo
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 export default router;
