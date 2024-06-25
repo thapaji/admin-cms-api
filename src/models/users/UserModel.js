@@ -13,7 +13,7 @@ export const getUserByEmail = (email) => {
 }
 
 export const getAUser = (filter) => {
-    return UserSchema.findOne({ filter });
+    return UserSchema.findOne( filter );
 }
 
 export const getUsers = () => {

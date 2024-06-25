@@ -11,3 +11,7 @@ export const getToken = token => {
 export const deleteSession = filter => {
     return SessionSchema.findOneAndDelete(filter);
 }
+
+export const deleteManySession = filter => {
+    return SessionSchema.deleteMany(filter);
+}

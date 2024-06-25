@@ -5,12 +5,10 @@ import { verifyAccessJWT } from "../utils/jwt.js";
 export const auth = async (req, res, next) => {
     try {
         const { authorization } = req.headers;
-        console.log(authorization)
+        // console.log(authorization)
         const decoded = verifyAccessJWT(authorization);
-        console.log(decoded)
         if (decoded?.email) {
             const tokenObj = await getToken(authorization)
-            console.log(tokenObj)
             const user = await getUserByEmail(decoded.email)
             if (user?._id) {
                 user.__v = undefined;
@@ -19,10 +17,12 @@ export const auth = async (req, res, next) => {
                 return next()
             }
         }
-        const error = {
-            message: 'Unauthorised',
-            status: 403
-        }
+        let message = ''
+        const statusCode = decoded === 'Invalid Token' ? 403 : 401
+        res.status(statusCode).json({
+            message: decoded === 'Invalid Token' ? 'jwt expired' : 'Unauthorised',
+            status: 'error'
+        })
     } catch (error) {
         next(error)
     }

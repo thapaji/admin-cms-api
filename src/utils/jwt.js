@@ -6,8 +6,8 @@ import { updateUser } from "../models/users/UserModel.js";
 /*************** Create access JWt *******************/
 
 export const signAccessToken = (payload) => {
-    const token = JWT.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
-    insertToken({ token, associate:payload.email });
+    const token = JWT.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1m" });
+    insertToken({ token, associate: payload.email });
     return token;
 }
 
@@ -33,11 +33,18 @@ export const signRefreshJWT = (email) => {
 
 /*************** Verify refresh JWt *******************/
 
+export const verifyRefreshJWT = (token) => {
+    try {
+        return JWT.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    } catch (error) {
+        console.log(error);
+        return 'Invalid Token';
+    }
+}
 
 
-
-export const getTokens =  email => {
-    return{
+export const getTokens = email => {
+    return {
         accessJWT: signAccessToken({ email }),
         refreshJWT: signRefreshJWT(email)
     }

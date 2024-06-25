@@ -1,10 +1,10 @@
 import express from "express";
 import { comparePassword, hashPassword } from "../utils/bcrypt.js";
-import { getUserByEmail, insertUser, updateUser } from "../models/users/UserModel.js";
+import { getAUser, getUserByEmail, insertUser, updateUser } from "../models/users/UserModel.js";
 import { newUserValidation } from "../middlewares/joiValidation.js";
-import { getTokens, signAccessToken, signRefreshJWT } from "../utils/jwt.js";
+import { getTokens, signAccessToken, signRefreshJWT, verifyAccessJWT, verifyRefreshJWT } from "../utils/jwt.js";
 import { auth } from "../middlewares/auth.js";
-import { deleteSession, insertToken } from "../models/session/SessionModel.js";
+import { deleteManySession, deleteSession, insertToken } from "../models/session/SessionModel.js";
 import { v4 as uuidv4 } from 'uuid'
 import { emailVerificationMail } from "../services/email/nodemailer.js";
 
@@ -129,5 +129,48 @@ router.get("/", auth, (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/new-accessjwt", async (req, res, next) => {
+  try {
+    const { authorization } = req.headers
+    /******** verify the JWt and check if exist in user table **********/
+    const decoded = await verifyRefreshJWT(authorization)
+    if (decoded?.email) {
+      const user = await getAUser({ email: decoded.email, refreshJWT: authorization })
+      if (user?._id) {
+        const accessJWT = signAccessToken({ email: decoded.email })
+        if (accessJWT) {
+          return res.json({
+            status: "success",
+            message: "Successfully logged in",
+            accessJWT: accessJWT,
+          });
+        }
+      }
+    }
+
+    res.status(401).json({
+      status: "error",
+      message: "Unauthorised",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/logout", auth, async (req, res, next) => {
+  try {
+    const { email } = req.userInfo
+    const user = await updateUser({ email }, { refreshJWT: '' })
+    await deleteManySession({ associate: email });
+    res.json({
+      status: "success",
+      message: "Logged out successfully!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 export default router;
