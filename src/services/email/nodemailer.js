@@ -23,7 +23,7 @@ const emailProcessor = async (mailBody) => {
 export const emailVerificationMail = ({ email, fName, url }) => {
     const obj = {
         from: '"Tech Store 👻" <maddison53@ethereal.email>',
-        to: email ,
+        to: email,
         subject: "Action Required",
         text: `Hello There, please verify your email. Click ${url} to verify.`,
         html: `
@@ -31,6 +31,23 @@ export const emailVerificationMail = ({ email, fName, url }) => {
             <br/>
             <p>Click below to verify your email.</p>
             <a href=${url}>Verify Email</a>
+            <p>Regards,<br/>Tech Store</p>`,
+    }
+    emailProcessor(obj);
+}
+
+export const emailOTP = ({ email, fName, token }) => {
+    const obj = {
+        from: '"Tech Store" <maddison53@ethereal.email>',
+        to: email,
+        subject: "OTP for reset password",
+        text: `Hello ${fName}, Here is your OTP : ${token}`,
+        html: `
+            <h1>Hello ${fName}</h1>
+            <br/>
+            <p>Here is your OTP.</p>
+            <div>${token}</div>
+            <p>If you did not request this OTP, dont share this with anybody.</p>
             <p>Regards,<br/>Tech Store</p>`,
     }
     emailProcessor(obj);

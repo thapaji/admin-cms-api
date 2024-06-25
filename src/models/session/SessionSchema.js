@@ -8,6 +8,10 @@ const SessionSchema = new mongoose.Schema({
     associate: {
         type: String,
         default: ''
+    },
+    type: {
+        type: String,
+        default: ''
     }
 },
     {

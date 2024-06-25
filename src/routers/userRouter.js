@@ -6,7 +6,8 @@ import { getTokens, signAccessToken, signRefreshJWT, verifyAccessJWT, verifyRefr
 import { auth } from "../middlewares/auth.js";
 import { deleteManySession, deleteSession, insertToken } from "../models/session/SessionModel.js";
 import { v4 as uuidv4 } from 'uuid'
-import { emailVerificationMail } from "../services/email/nodemailer.js";
+import { emailOTP, emailVerificationMail } from "../services/email/nodemailer.js";
+import { otpGenerator } from "../utils/OtpGenerator.js";
 
 const router = express.Router();
 
@@ -166,6 +167,25 @@ router.delete("/logout", auth, async (req, res, next) => {
     res.json({
       status: "success",
       message: "Logged out successfully!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+router.post("/otp", async (req, res, next) => {
+  try {
+    const { email } = req.body
+    const user = await getUserByEmail(email);
+    if (user?._id) {
+      const token = otpGenerator()
+      const session = await insertToken({ token: token, type: 'otp', associate: email });
+      session?._id && emailOTP({ token, fName: user.fname, email })
+    }
+    res.json({
+      status: "success",
+      message: "If email exists in our system, we have sent you OTP in your email address.",
     });
   } catch (error) {
     next(error);

@@ -1,6 +1,7 @@
 import SessionSchema from "./SessionSchema.js";
 
 export const insertToken = (obj) => {
+    console.log(obj)
     return SessionSchema(obj).save();
 }
 
