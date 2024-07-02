@@ -9,6 +9,10 @@ export const getProduct = ({ filter }) => {
     return ProductSchema.findOne(filter);
 }
 
+export const getProductById = (_id) => {
+    return ProductSchema.findById(_id);
+}
+
 export const getAllProducts = () => {
     return ProductSchema.find();
 }

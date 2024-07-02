@@ -1,6 +1,6 @@
 import express from 'express';
 import slugify from 'slugify';
-import { deleteProduct, getAllProducts, insertProduct, updateProduct } from '../models/products/ProductModel.js';
+import { deleteProduct, getAllProducts, getProductById, insertProduct, updateProduct } from '../models/products/ProductModel.js';
 const router = express.Router();
 
 router.post('/', async (req, res, next) => {
@@ -35,6 +35,20 @@ router.get("/", async (req, res, next) => {
             status: "success",
             message: "Products Fetched successfully",
             products
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/:_id", async (req, res, next) => {
+    try {
+        const { _id } = req.params;
+        const product = await getProductById(_id)
+        res.json({
+            status: "success",
+            message: "Product Fetched successfully",
+            product
         });
     } catch (error) {
         next(error);
