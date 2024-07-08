@@ -1,10 +1,13 @@
 import express from 'express';
 import slugify from 'slugify';
 import { deleteProduct, getAllProducts, getProductById, insertProduct, updateProduct } from '../models/products/ProductModel.js';
+import upload from '../utils/uploadMulter.js';
 const router = express.Router();
 
-router.post('/', async (req, res, next) => {
+router.post('/', upload.array('images', 5), async (req, res, next) => {
     try {
+        console.log('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::')
+        console.log(req.body)
         const { name } = req.body;
         if (typeof name === 'string' && name.length) {
             const slug = slugify(name, { lower: true })

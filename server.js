@@ -3,7 +3,7 @@ import morgan from "morgan";
 import { conectMongo } from "./src/config/mongoDBConfig.js";
 import cors from 'cors';
 import routers from './src/routers/routers.js'
-import userRouter from './src/routers/userRouter.js'
+import filePath from 'path';
 
 const app = express();
 
@@ -19,6 +19,8 @@ conectMongo();
 
 app.use(express.json());
 app.use(cors())
+const __dirname = filePath.resolve();
+app.use(express.static(filePath.join(__dirname, 'public')))
 
 /*************** Routers and endpoints ***********************/
 // app.use('/api/v1/users', userRouter)
