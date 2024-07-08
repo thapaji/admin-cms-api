@@ -6,11 +6,12 @@ const router = express.Router();
 
 router.post('/', upload.array('images', 5), async (req, res, next) => {
     try {
-        console.log('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::')
-        console.log(req.body)
         const { name } = req.body;
         if (typeof name === 'string' && name.length) {
             const slug = slugify(name, { lower: true })
+            const images = req.files.map(file => file.path);
+            req.body.thumbnail = images[0]
+            req.body.images = images;
             const product = await insertProduct({ ...req.body, slug })
             product?._id ? res.json({
                 status: 'success',
